@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poligonos Region Norte</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+
+    <link rel ="stylesheet" type="text/css" href="Mapa.css">
+
+    <style>
+        /* Estilos rápidos para el buscador para que se vea ordenado */
+        .controles-mapa {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 2px solid #ddd;
+            font-family: sans-serif;
+        }
+        .seccion-control {
+            display: inline-block;
+            margin-right: 20px;
+            vertical-align: top;
+        }
+        input, select, button {
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #btnLimpiar {
+            background-color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controles-mapa">
+        <h1>Poligonos Region Norte</h1>
+        
+       <select name="Select Division" id="Divisiones">
+    <option value="0">Selecciona una Division</option>
+    <option value="CHIHUAHUA" data-coords="28.6353, -106.0889">210 - Chihuahua</option>
+    <option value="DURANGO" data-coords="24.0277, -104.6532">220 - Durango</option>
+    <option value="MONTERREY" data-coords="25.6714, -100.3095">230 - Monterrey</option>
+    <option value="VICTORIA" data-coords="23.7369, -99.1411">240 - Victoria</option>
+        <div class="seccion-control">
+
+            <label><strong>Buscador de Coordenadas:</strong></label><br>
+            <input type="text" id="latitud" placeholder="Latitud (ej: 28.6)">
+            <input type="text" id="longitud" placeholder="Longitud (ej: -106.0)">
+            <button id="btnBuscar">Ubicar Punto</button>
+            <button id="btnLimpiar">Limpiar Pin</button>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
+    <script src="layers/poligonos.js"></script>
+    <script src="Mapa.js"></script>
+
+</body>
+</html>
