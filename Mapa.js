@@ -46,18 +46,25 @@ var redIcon = new L.Icon({
 
 var marcadorBusqueda = null;
 
-// 4. Función para las Ventanas Emergentes (Popups) con Ruta Espejo
+// 4. Función para las Ventanas Emergentes (Popups) con Ruta Espejo y Día Espejo
 function popup(feature, layer) {
     if (feature.properties && feature.properties.Ruta){
-        // Usamos corchetes para leer "RUTA ESPEJO" debido al espacio en el nombre
+        // Extraemos las propiedades del GeoJSON
         let rutaEspejo = feature.properties["RUTA ESPEJO"] || "No asignada";
+        let diaNormal = feature.properties.Dia || "N/A";
+        let diaEspejo = feature.properties["Dia espejo"] || "No asignado"; // Esta es la nueva columna
 
         layer.bindPopup(
+            "<div style='font-family: Arial; font-size: 14px;'>" +
             "<strong>Ruta: </strong>" + feature.properties.Ruta + 
-            "<br/><strong>Día: </strong>" + feature.properties.Dia +
-            "<br/><strong>Ruta Espejo: </strong>" + rutaEspejo +
-            "<br/><strong>Sitio: </strong>" + (feature.properties.SITIO || "N/A") +
-            "<br/><strong>Portafolio: </strong>" + (feature.properties.PORTAFOLIO || "N/A")
+            "<br/><strong>Día: </strong>" + diaNormal +
+            "<hr style='margin: 5px 0; border: 0; border-top: 1px solid #ccc;'>" +
+            "<strong>Ruta Espejo: </strong>" + rutaEspejo +
+            "<br/><strong>Día Espejo: </strong>" + diaEspejo + 
+            "<hr style='margin: 5px 0; border: 0; border-top: 1px solid #ccc;'>" +
+            "<strong>Sitio: </strong>" + (feature.properties.SITIO || "N/A") +
+            "<br/><strong>Portafolio: </strong>" + (feature.properties.PORTAFOLIO || "N/A") +
+            "</div>"
         );
     }
 }
@@ -90,10 +97,14 @@ document.getElementById('Divisiones').addEventListener('change', function(e) {
     }
 });
 
-// 6. Lógica del Buscador de Coordenadas
+// 6. Lógica del Buscador de Coordenadas (Acepta puntos y comas)
 document.getElementById('btnBuscar').addEventListener('click', function() {
-    let lat = parseFloat(document.getElementById('latitud').value);
-    let lng = parseFloat(document.getElementById('longitud').value);
+    // Leemos el valor y reemplazamos la coma por punto inmediatamente
+    let latRaw = document.getElementById('latitud').value.replace(',', '.');
+    let lngRaw = document.getElementById('longitud').value.replace(',', '.');
+
+    let lat = parseFloat(latRaw);
+    let lng = parseFloat(lngRaw);
 
     if (!isNaN(lat) && !isNaN(lng)) {
         if (marcadorBusqueda) map.removeLayer(marcadorBusqueda);
@@ -103,7 +114,7 @@ document.getElementById('btnBuscar').addEventListener('click', function() {
         
         map.flyTo([lat, lng], 15);
     } else {
-        alert("Por favor, ingresa coordenadas válidas.");
+        alert("Por favor, ingresa coordenadas válidas (usa puntos o comas).");
     }
 });
 
