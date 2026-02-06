@@ -52,7 +52,7 @@ function popup(feature, layer) {
         // Extraemos las propiedades del GeoJSON
         let rutaEspejo = feature.properties["RUTA ESPEJO"] || "No asignada";
         let diaNormal = feature.properties.Dia || "N/A";
-        let diaEspejo = feature.properties["Dia espejo"] || "No asignado"; // Esta es la nueva columna
+        let diaEspejo = feature.properties["Dia espejo"] || "No asignado";
 
         layer.bindPopup(
             "<div style='font-family: Arial; font-size: 14px;'>" +
