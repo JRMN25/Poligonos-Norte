@@ -1,4 +1,259 @@
+/* =========================================
+   1. CARGA DE FUENTE CORPORATIVA
+   ========================================= */
+@font-face {
+    font-family: 'FuenteCorporativa';
+    src: url('fonts/fuente_oficial.TTF') format('truetype'); 
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* =========================================
+   2. RESET Y CONFIGURACIÓN GENERAL
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    height: 100%;
+    overflow: hidden; /* Elimina el scroll de la página */
+    /* Fuentes del sistema nativas para máxima legibilidad en los datos y controles */
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f6f9; 
+    color: #333;
+    
+    /* Convierte la página en una columna flexible para el diseño responsivo */
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================
+   3. PANEL DE CONTROLES (HEADER)
+   ========================================= */
+.controles-mapa {
+    background: #ffffff;
+    padding: 15px 25px; 
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos bajen de renglón si no hay espacio */
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    position: relative;
+    z-index: 1000;
+}
+
+.controles-mapa h1 {
+    font-family: 'FuenteCorporativa', sans-serif; /* APLICADO SOLO AL TÍTULO */
+    font-size: 22px; 
+    font-weight: 600;
+    color: #1a202c;
+    border-right: 2px solid #e2e8f0;
+    padding-right: 15px;
+    letter-spacing: 0.5px;
+}
+
+/* =========================================
+   4. SECCIONES DE BÚSQUEDA Y FILTROS
+   ========================================= */
+.seccion-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.seccion-control label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+/* =========================================
+   5. INPUTS Y SELECTORES
+   ========================================= */
+input, select {
+    padding: 9px 14px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    background-color: #f8fafc;
+    transition: all 0.2s ease;
+    font-family: inherit; /* Hereda la fuente limpia del body */
+}
+
+input:focus, select:focus {
+    border-color: #3182ce;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+}
+
+/* =========================================
+   6. BOTONES
+   ========================================= */
+button {
+    padding: 10px 18px;
+    background-color: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background-color 0.2s, transform 0.1s;
+    font-family: inherit; /* Hereda la fuente limpia del body */
+}
+
+button:hover {
+    background-color: #2b6cb0;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+#btnLimpiar {
+    background-color: #718096;
+}
+
+#btnLimpiar:hover {
+    background-color: #4a5568;
+}
+
+/* =========================================
+   7. CONTENEDOR DEL MAPA
+   ========================================= */
 #map {
-    height: 90vh;
-    width: 100hw;
+    flex: 1; /* Toma todo el espacio vertical que sobra */
+    width: 100%;
+    z-index: 1;
+}
+
+/* =========================================
+   8. LEYENDA (DENTRO DEL MAPA)
+   ========================================= */
+.info.legend {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    padding: 15px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    border: none !important;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+    min-width: 200px;
+}
+
+.info.legend h4 {
+    grid-column: 1 / -1;
+    margin: 0 0 8px 0 !important;
+    font-size: 15px;
+    color: #2d3748;
+    font-weight: 600;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 8px;
+    text-align: center;
+}
+
+.info.legend div {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.info.legend i {
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    margin-right: 10px !important;
+}
+
+/* =========================================
+   9. RESPONSIVIDAD (PANTALLAS DIVIDIDAS Y MÓVILES)
+   ========================================= */
+@media (max-width: 900px) {
+    .controles-mapa {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+    }
+    
+    .controles-mapa h1 {
+        border-right: none;
+        border-bottom: 2px solid #e2e8f0;
+        padding-right: 0;
+        padding-bottom: 10px;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    
+    .seccion-control {
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+    
+    .seccion-control input, 
+    .seccion-control select {
+        flex: 1;
+        min-width: 140px;
+    }
+}
+
+/* =========================================
+   10. MODO OSCURO (PRUEBA VISUAL)
+   ========================================= */
+body {
+    background-color: #1a202c; 
+    color: #e2e8f0;
+}
+
+.controles-mapa {
+    background: #2d3748;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.controles-mapa h1 {
+    color: #f7fafc;
+    border-right-color: #4a5568;
+}
+
+.seccion-control label {
+    color: #a0aec0;
+}
+
+input, select {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #f7fafc;
+}
+
+input:focus, select:focus {
+    background-color: #2d3748;
+    border-color: #63b3ed;
+}
+
+/* Leyenda oscura */
+.info.legend {
+    background-color: rgba(45, 55, 72, 0.95) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+}
+
+.info.legend h4 {
+    color: #f7fafc;
+    border-bottom-color: #4a5568;
+}
+
+.info.legend div {
+    color: #e2e8f0;
+}
+
+/* Bordes en móviles */
+@media (max-width: 900px) {
+    .controles-mapa h1 {
+        border-bottom-color: #4a5568;
+    }
 }

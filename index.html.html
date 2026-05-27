@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polígonos Región Norte</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="Mapa.css">
+</head>
+<body>
+
+    <div class="controles-mapa">
+        <h1>Polígonos Región Norte</h1>
+        
+        <div class="seccion-control">
+            <label><strong>División:</strong></label>
+            <select name="Select Division" id="Divisiones">
+                <option value="0">Selecciona una División</option>
+                <option value="210" data-coords="28.6353, -106.0889">210 - Chihuahua</option>
+                <option value="220" data-coords="24.0277, -104.6532">220 - Durango</option>
+                <option value="230" data-coords="25.6714, -100.3095">230 - Monterrey</option>
+                <option value="240" data-coords="23.7369, -99.1411">240 - Victoria</option>
+            </select>
+        </div>
+        <div class="seccion-control">
+            <label><strong>Carga Masiva:</strong></label>
+            <input type="file" id="archivoCSV" accept=".csv" style="display: none;">
+            <button id="btnCargarCSV" style="background-color: #388E3C;">Subir CSV</button>
+            <button id="btnLimpiarCSV" class="btn-secundario" style="display: none;">Limpiar Puntos CSV</button>
+        </div>
+
+       <div class="seccion-control">
+    <label><strong>Buscador Coordenadas:</strong></label>
+    <input type="text" id="coordenadas" placeholder="Ej: 28.6353, -106.0889" style="min-width: 220px;">
+    
+    <button id="btnBuscar">Ubicar Punto</button>
+    <button id="btnLimpiar" class="btn-secundario">Limpiar Pin</button>
+</div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="layers/poligonos.js"></script>
+    <script src="Mapa.js"></script>
+</body>
+</html>
