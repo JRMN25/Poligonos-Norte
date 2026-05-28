@@ -127,7 +127,9 @@ document.getElementById('Divisiones').addEventListener('change', function(e) {
     }
 });
 
-// 9. Lógica del Buscador
+// ==========================================
+// 9. LÓGICA DEL BUSCADOR (Un solo recuadro automático)
+// ==========================================
 document.getElementById('btnBuscar').addEventListener('click', function() {
     let inputVal = document.getElementById('coordenadas').value.trim();
     
@@ -137,20 +139,17 @@ document.getElementById('btnBuscar').addEventListener('click', function() {
         return;
     }
 
-    // LÓGICA DE DETECCIÓN: Cortar el texto a la mitad
-    // Primero intentamos separar por coma
-    let partes = inputVal.split(',');
-    
-    // Si no encontró una coma, intentamos separar por espacios en blanco
-    if (partes.length < 2) {
-        partes = inputVal.split(/\s+/); 
-    }
+    // LÓGICA DE DETECCIÓN AVANZADA (Regex)
+    // Busca cualquier bloque de números (positivos o negativos) que contenga punto o coma decimal
+    let regex = /-?\d+(?:[.,]\d+)?/g;
+    let coincidencias = inputVal.match(regex);
 
-    // Si logramos obtener 2 partes (Latitud y Longitud)
-    if (partes.length >= 2) {
-        // Limpiamos espacios y convertimos comas decimales europeas en puntos
-        let lat = parseFloat(partes[0].trim().replace(',', '.'));
-        let lng = parseFloat(partes[1].trim().replace(',', '.'));
+    // Si logramos capturar al menos 2 bloques numéricos (Latitud y Longitud)
+    if (coincidencias && coincidencias.length >= 2) {
+        
+        // Reemplazamos la coma por punto solo para que JavaScript pueda hacer los cálculos matemáticos
+        let lat = parseFloat(coincidencias[0].replace(',', '.'));
+        let lng = parseFloat(coincidencias[1].replace(',', '.'));
 
         if (!isNaN(lat) && !isNaN(lng)) {
             if (marcadorBusqueda) map.removeLayer(marcadorBusqueda);
@@ -202,11 +201,11 @@ document.getElementById('btnBuscar').addEventListener('click', function() {
             alert("Los números ingresados no son válidos. Revisa el formato.");
         }
     } else {
-        alert("No se pudo detectar la Latitud y Longitud. Asegúrate de separarlas con una coma o un espacio (Ej: 28.6, -106.0)");
+        alert("No se pudo detectar la Latitud y Longitud. Asegúrate de ingresar la coordenada completa.");
     }
 });
 
-// Limpiar el Pin (Actualizado para el nuevo input)
+// Limpiar el Pin
 document.getElementById('btnLimpiar').addEventListener('click', function() {
     if (marcadorBusqueda) map.removeLayer(marcadorBusqueda);
     document.getElementById('coordenadas').value = "";
@@ -249,14 +248,12 @@ legend.onAdd = function (map) {
     }
     return div;
 };
-
-legend.addTo(map);
-
 // ==========================================
 // 11. LÓGICA DE CARGA MASIVA (PAPAPARSE)
 // ==========================================
 
 var capaCSV = L.layerGroup().addTo(map);
+var datosAuditados = []; // Memoria global para guardar el CSV con la auditoría
 
 document.getElementById('btnCargarCSV').addEventListener('click', function() {
     document.getElementById('archivoCSV').click();
@@ -273,6 +270,7 @@ document.getElementById('archivoCSV').addEventListener('change', function(e) {
         complete: function(results) {
             procesarDatosCSV(results.data);
             document.getElementById('btnLimpiarCSV').style.display = 'inline-block';
+            document.getElementById('btnDescargarCSV').style.display = 'inline-block'; 
         }
     });
     
@@ -281,18 +279,20 @@ document.getElementById('archivoCSV').addEventListener('change', function(e) {
 
 function procesarDatosCSV(datos) {
     capaCSV.clearLayers(); 
+    datosAuditados = []; // Vaciamos la memoria en cada carga nueva
     let procesados = 0;
     let conError = 0;
 
     datos.forEach(fila => {
-        // 1. Búsqueda de coordenadas
-        let lat = parseFloat(fila.Latitud || fila.lat || fila.LAT || fila.LATITUD);
-        let lng = parseFloat(fila.Longitud || fila.lon || fila.lng || fila.LON || fila.LONGITUD);
+        let latVal = String(fila.Latitud || fila.Lat || fila.lat || fila.LATITUD || "").replace(',', '.');
+        let lngVal = String(fila.Longitud || fila.Lon || fila.lon || fila.LON || fila.LONGITUD || "").replace(',', '.');
+        
+        let lat = parseFloat(latVal);
+        let lng = parseFloat(lngVal);
 
         if (!isNaN(lat) && !isNaN(lng)) {
             
-            // 2. Traductor de Días (Limpieza total de acentos y mayúsculas)
-            let diaOriginalCSV = String(fila.Dia || fila.DIA || fila.dia || "S/D").trim();
+            let diaOriginalCSV = String(fila.Dia || fila.DIA || fila.dia || fila.Día || "S/D").trim();
             let diaColor = "S/D";
             let diaMin = diaOriginalCSV.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             
@@ -312,7 +312,7 @@ function procesarDatosCSV(datos) {
                 fillOpacity: 0.9 
             });
 
-            // 3. Cruce espacial con Turf.js
+            // Cruce espacial con Turf.js
             let punto = turf.point([lng, lat]);
             let rutaDetectada = "Fuera de Polígono";
             let diaDetectado = "-";
@@ -328,17 +328,21 @@ function procesarDatosCSV(datos) {
                 }
             }
 
-            // 4. LECTURA AUTO-MÁGICA DE COLUMNAS DEL CSV
+            // Inyectamos el resultado a la fila original
+            fila.Ruta_Calculada_Mapa = rutaDetectada;
+            fila.Dia_Calculado_Mapa = diaDetectado;
+            
+            // Guardamos en la memoria para el botón de descargar
+            datosAuditados.push(fila);
+
             let listaDatosCSV = "";
             for (let columna in fila) {
                 let valor = fila[columna];
-                // Filtramos celdas vacías o nulas para que no ensucien la vista
-                if (valor !== null && valor !== "" && valor !== undefined) {
+                if (valor !== null && valor !== "" && valor !== undefined && columna !== "Ruta_Calculada_Mapa" && columna !== "Dia_Calculado_Mapa") {
                     listaDatosCSV += `<strong>${columna}:</strong> ${valor}<br>`;
                 }
             }
 
-            // 5. Armado de la tarjeta (Con scroll interno por si hay muchas columnas)
             let contenido = `
                 <div style='font-family: Arial, sans-serif; font-size: 13px; min-width: 220px; max-height: 220px; overflow-y: auto;'>
                     <strong style='color: #D81B60; font-size: 14px;'>📍 Datos Cargados (CSV)</strong><br>
@@ -361,7 +365,35 @@ function procesarDatosCSV(datos) {
     alert(`📊 Carga Masiva Completada:\n- Clientes mapeados: ${procesados}\n- Filas ignoradas (sin coordenadas válidas): ${conError}`);
 }
 
+// Limpiar Puntos
 document.getElementById('btnLimpiarCSV').addEventListener('click', function() {
     capaCSV.clearLayers();
+    datosAuditados = []; 
     this.style.display = 'none';
+    document.getElementById('btnDescargarCSV').style.display = 'none';
+});
+
+// ==========================================
+// 12. EXPORTACIÓN A CSV
+// ==========================================
+document.getElementById('btnDescargarCSV').addEventListener('click', function() {
+    if (datosAuditados.length === 0) {
+        alert("No hay datos para descargar. Sube un archivo CSV primero.");
+        return;
+    }
+
+    // Convertimos el JSON auditado de vuelta a CSV
+    let csvGenerado = Papa.unparse(datosAuditados);
+    
+    // BOM para acentos y ñ
+    let blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvGenerado], {type: "text/csv;charset=utf-8;"}); 
+    
+    let link = document.createElement("a");
+    let url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "Validacion_Coordenadas.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 });
