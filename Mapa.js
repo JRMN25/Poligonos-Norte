@@ -1,4 +1,6 @@
-// 1. Definir los Mapas Base (OSM y CartoDB)
+// =========================================================================
+// 1. DEFINICIÓN DE MAPAS BASE (OSM Y CARTODB)
+// =========================================================================
 var mapaCalles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap'
 });
@@ -6,18 +8,23 @@ var mapaCalles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
 var mapaLimpio = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; CARTO'
 });
+
 var mapaOscuro = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; CARTO'
 });
 
-// 2. Inicialización del Mapa
+// =========================================================================
+// 2. INICIALIZACIÓN DEL MAPA
+// =========================================================================
 let map = L.map('map', {
     center: [28.6353, -106.0889],
     zoom: 6,
-    layers: [mapaCalles] // Capa inicial
+    layers: [mapaCalles] // Capa base por defecto
 });
 
-// 3. Crear el Control para cambiar entre mapas
+// =========================================================================
+// 3. CONTROL DE CAPAS BASE
+// =========================================================================
 var mapasBase = {
     "Detalle de Calles (OSM)": mapaCalles,
     "Vista Polígonos": mapaLimpio,
@@ -25,7 +32,9 @@ var mapasBase = {
 };
 L.control.layers(mapasBase, null, {position: 'topright'}).addTo(map);
 
-// 4. Configuración de Colores por Día
+// =========================================================================
+// 4. CONFIGURACIÓN DE COLORES POR DÍA (RTM STANDARD)
+// =========================================================================
 function getColor(dia) {
     switch (dia) {
         case 'Lun': return '#4F2170'; 
@@ -38,16 +47,17 @@ function getColor(dia) {
     }
 }
 
-// 5. Función para las Ventanas Emergentes (Popups) - ¡CORREGIDO!
+// =========================================================================
+// 5. CONFIGURACIÓN DE VENTANAS EMERGENTES (POPUPS)
+// =========================================================================
 function popup(feature, layer) {
     if (feature.properties && feature.properties.Ruta){
-        // Usamos los nombres EXACTOS de tu GeoJSON
         let rutaEspejo = feature.properties.RUTA_ESPEJO || "No asignada";
         let diaNormal = feature.properties.Dia || "N/A";
         let diaEspejo = feature.properties.Dia_espejo || "No asignado"; 
 
         layer.bindPopup(
-            "<div style='font-family: Arial; font-size: 14px;'>" +
+            "<div style='font-family: Arial, sans-serif; font-size: 14px; min-width: 180px;'> " +
             "<strong>Ruta: </strong>" + feature.properties.Ruta + 
             "<br/><strong>Día: </strong>" + diaNormal +
             "<hr style='margin: 5px 0; border: 0; border-top: 1px solid #ccc;'>" +
@@ -55,13 +65,16 @@ function popup(feature, layer) {
             "<br/><strong>Día Espejo: </strong>" + diaEspejo + 
             "<hr style='margin: 5px 0; border: 0; border-top: 1px solid #ccc;'>" +
             "<strong>Sitio: </strong>" + (feature.properties.SITIO || "N/A") +
+            "<br/><strong>Grupo: </strong>" + (feature.properties.GRUPO || "N/A") +
             "<br/><strong>Portafolio: </strong>" + (feature.properties.PORTAFOLIO || "N/A") +
             "</div>"
         );
     }
 }
 
-// 6. Capa GeoJSON
+// =========================================================================
+// 6. CAPA GEOJSON INICIAL (Montada desde el arranque para manipulación dinámica)
+// =========================================================================
 var capaPoligonos = L.geoJSON(poligonos, {
     onEachFeature: popup,
     style: function(feature) {
@@ -72,9 +85,11 @@ var capaPoligonos = L.geoJSON(poligonos, {
             fillColor: getColor(feature.properties.Dia) 
         };
     }
-});
+}).addTo(map);
 
-// 7. Icono personalizado para el buscador
+// =========================================================================
+// 7. ICONO PERSONALIZADO PARA EL BUSCADOR
+// =========================================================================
 var redIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -86,68 +101,21 @@ var redIcon = new L.Icon({
 
 var marcadorBusqueda = null;
 
-// 8. Lógica del Filtro de Divisiones -
-document.getElementById('Divisiones').addEventListener('change', function(e) {
-    let idDivision = e.target.value; 
-    
-    // Primero, si ya había una capa, la quitamos del mapa para limpiar
-    if (map.hasLayer(capaPoligonos)) {
-        map.removeLayer(capaPoligonos);
-    }
-    
-    // Solo hacemos algo si no eligieron la opción "0"
-    if (idDivision !== "0") {
-        // Volvemos a crear la capa, pero filtrando los datos
-        capaPoligonos = L.geoJSON(poligonos, {
-            filter: function(feature) {
-                let divisionPoligono = feature.properties.Division; 
-                if (idDivision === "230") {
-                    return divisionPoligono === "230" || divisionPoligono === "231";
-                }
-                return divisionPoligono === idDivision;
-            },
-            onEachFeature: popup,
-            style: function(feature) {
-                return { 
-                    color: "white", 
-                    weight: 1.5, 
-                    fillOpacity: 0.6,
-                    fillColor: getColor(feature.properties.Dia) 
-                };
-            }
-        }).addTo(map);
-
-        // Mover la cámara a la división seleccionada
-        let selectedOption = e.target.options[e.target.selectedIndex];
-        let coordsString = selectedOption.getAttribute('data-coords');
-        if (coordsString) {
-            let coordenadas = coordsString.split(',').map(Number);
-            map.flyTo(coordenadas, 8);
-        }
-    }
-});
-
-// ==========================================
-// 9. LÓGICA DEL BUSCADOR (Un solo recuadro automático)
-// ==========================================
+// =========================================================================
+// 9. LÓGICA DEL BUSCADOR DE COORDENADAS (Regex automático)
+// =========================================================================
 document.getElementById('btnBuscar').addEventListener('click', function() {
     let inputVal = document.getElementById('coordenadas').value.trim();
     
-    // Si está vacío, no hacemos nada
     if (!inputVal) {
         alert("Por favor, ingresa una coordenada.");
         return;
     }
 
-    // LÓGICA DE DETECCIÓN AVANZADA (Regex)
-    // Busca cualquier bloque de números (positivos o negativos) que contenga punto o coma decimal
     let regex = /-?\d+(?:[.,]\d+)?/g;
     let coincidencias = inputVal.match(regex);
 
-    // Si logramos capturar al menos 2 bloques numéricos (Latitud y Longitud)
     if (coincidencias && coincidencias.length >= 2) {
-        
-        // Reemplazamos la coma por punto solo para que JavaScript pueda hacer los cálculos matemáticos
         let lat = parseFloat(coincidencias[0].replace(',', '.'));
         let lng = parseFloat(coincidencias[1].replace(',', '.'));
 
@@ -162,6 +130,7 @@ document.getElementById('btnBuscar').addEventListener('click', function() {
             let rutaEspejoDetectada = "No asignada";
             let diaEspejoDetectado = "No asignado";
             let sitioDetectado = "N/A";
+            let grupoDetectado = "N/A";
             let portafolioDetectado = "N/A";
 
             if (typeof poligonos !== 'undefined') {
@@ -173,6 +142,7 @@ document.getElementById('btnBuscar').addEventListener('click', function() {
                         rutaEspejoDetectada = feature.properties.RUTA_ESPEJO || "No asignada";
                         diaEspejoDetectado = feature.properties.Dia_espejo || "No asignado";
                         sitioDetectado = feature.properties.SITIO || "N/A";
+                        grupoDetectado = feature.properties.GRUPO || "N/A";
                         portafolioDetectado = feature.properties.PORTAFOLIO || "N/A";
                         break; 
                     }
@@ -190,6 +160,7 @@ document.getElementById('btnBuscar').addEventListener('click', function() {
                     <strong>Día Espejo:</strong> ${diaEspejoDetectado}
                     <hr style='margin: 6px 0; border: 0; border-top: 1px solid #eee;'>
                     <strong>Sitio:</strong> ${sitioDetectado}<br>
+                    <strong>Grupo:</strong> ${grupoDetectado}<br>
                     <strong>Portafolio:</strong> ${portafolioDetectado}
                 </div>
             `;
@@ -205,32 +176,31 @@ document.getElementById('btnBuscar').addEventListener('click', function() {
     }
 });
 
-// Limpiar el Pin
 document.getElementById('btnLimpiar').addEventListener('click', function() {
     if (marcadorBusqueda) map.removeLayer(marcadorBusqueda);
     document.getElementById('coordenadas').value = "";
 });
 
-//Obtener coordenadas al hacer clic
+// Capturar ubicación con un clic en el mapa
 map.on('click', function(e) {
     let lat = e.latlng.lat.toFixed(6);
     let lng = e.latlng.lng.toFixed(6);
     
-    document.getElementById('latitud').value = lat;
-    document.getElementById('longitud').value = lng;
-    
+    // Corregido: Se eliminó el volcado a elementos HTML inexistentes para evitar errores en la consola
     L.popup()
         .setLatLng(e.latlng)
-        .setContent("<strong>Coordenada Ingresada:</strong><br>" + lat + ", " + lng)
+        .setContent("<strong>Coordenada Seleccionada:</strong><br>" + lat + ", " + lng)
         .openOn(map);
 });
 
-// 10. Leyenda de Colores
+// =========================================================================
+// 10. LEYENDA DE COLORES INTERNA
+// =========================================================================
 var legend = L.control({position: 'bottomright'});
 
 legend.onAdd = function (map) {
     var div = L.DomUtil.create('div', 'info legend');
-    var dias = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie','Sab'];
+    var dias = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
     
     div.style.backgroundColor = 'white';
     div.style.padding = '10px';
@@ -248,12 +218,26 @@ legend.onAdd = function (map) {
     }
     return div;
 };
-// ==========================================
-// 11. LÓGICA DE CARGA MASIVA (PAPAPARSE)
-// ==========================================
+legend.addTo(map);
 
+// =========================================================================
+// 11. LÓGICA DE CARGA MASIVA (PAPAPARSE) E INDEXACIÓN ESPACIAL (BBOX)
+// =========================================================================
 var capaCSV = L.layerGroup().addTo(map);
-var datosAuditados = []; // Memoria global para guardar el CSV con la auditoría
+var datosAuditados = []; 
+
+// --- MOTOR ESPACIAL: Pre-calcular Bounding Boxes (Cajas delimitadoras) ---
+if (typeof poligonos !== 'undefined') {
+    poligonos.features.forEach(feature => {
+        feature.properties.bbox = turf.bbox(feature); // Pre-calculado una sola vez
+    });
+}
+
+function puntoEnBBox(pt, bbox) {
+    return pt[0] >= bbox[0] && pt[0] <= bbox[2] &&
+           pt[1] >= bbox[1] && pt[1] <= bbox[3];
+}
+// ------------------------------------------------------------------------
 
 document.getElementById('btnCargarCSV').addEventListener('click', function() {
     document.getElementById('archivoCSV').click();
@@ -263,14 +247,25 @@ document.getElementById('archivoCSV').addEventListener('change', function(e) {
     let file = e.target.files[0];
     if (!file) return;
 
+    // Lanzar loader visual
+    document.getElementById('loader-overlay').style.display = 'flex';
+    document.getElementById('loader-texto').innerText = "Leyendo archivo CSV...";
+
     Papa.parse(file, {
         header: true, 
         dynamicTyping: true,
         skipEmptyLines: true,
         complete: function(results) {
-            procesarDatosCSV(results.data);
-            document.getElementById('btnLimpiarCSV').style.display = 'inline-block';
-            document.getElementById('btnDescargarCSV').style.display = 'inline-block'; 
+            document.getElementById('loader-texto').innerText = "Calculando ubicación espacial de clientes...";
+            
+            // Permitir el refresco del DOM antes del cálculo intensivo
+            setTimeout(() => {
+                procesarDatosCSV(results.data);
+                
+                document.getElementById('btnLimpiarCSV').style.display = 'inline-block';
+                document.getElementById('btnDescargarCSV').style.display = 'inline-block'; 
+                document.getElementById('loader-overlay').style.display = 'none';
+            }, 50);
         }
     });
     
@@ -279,7 +274,7 @@ document.getElementById('archivoCSV').addEventListener('change', function(e) {
 
 function procesarDatosCSV(datos) {
     capaCSV.clearLayers(); 
-    datosAuditados = []; // Vaciamos la memoria en cada carga nueva
+    datosAuditados = []; 
     let procesados = 0;
     let conError = 0;
 
@@ -291,7 +286,6 @@ function procesarDatosCSV(datos) {
         let lng = parseFloat(lngVal);
 
         if (!isNaN(lat) && !isNaN(lng)) {
-            
             let diaOriginalCSV = String(fila.Dia || fila.DIA || fila.dia || fila.Día || "S/D").trim();
             let diaColor = "S/D";
             let diaMin = diaOriginalCSV.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -312,27 +306,28 @@ function procesarDatosCSV(datos) {
                 fillOpacity: 0.9 
             });
 
-            // Cruce espacial con Turf.js
-            let punto = turf.point([lng, lat]);
+            let coordPunto = [lng, lat]; 
+            let puntoTurf = turf.point(coordPunto);
             let rutaDetectada = "Fuera de Polígono";
             let diaDetectado = "-";
 
             if (typeof poligonos !== 'undefined') {
                 for (let i = 0; i < poligonos.features.length; i++) {
                     let feature = poligonos.features[i];
-                    if (turf.booleanPointInPolygon(punto, feature)) {
-                        rutaDetectada = feature.properties.Ruta || "Sin nombre";
-                        diaDetectado = feature.properties.Dia || "N/A";
-                        break; 
+                    
+                    // FILTRO DE ALTO RENDIMIENTO (BBox rápido antes del algoritmo complejo de Turf)
+                    if (feature.properties.bbox && puntoEnBBox(coordPunto, feature.properties.bbox)) {
+                        if (turf.booleanPointInPolygon(puntoTurf, feature)) {
+                            rutaDetectada = feature.properties.Ruta || "Sin nombre";
+                            diaDetectado = feature.properties.Dia || "N/A";
+                            break; 
+                        }
                     }
                 }
             }
 
-            // Inyectamos el resultado a la fila original
             fila.Ruta_Calculada_Mapa = rutaDetectada;
             fila.Dia_Calculado_Mapa = diaDetectado;
-            
-            // Guardamos en la memoria para el botón de descargar
             datosAuditados.push(fila);
 
             let listaDatosCSV = "";
@@ -362,10 +357,16 @@ function procesarDatosCSV(datos) {
         }
     });
 
-    alert(`📊 Carga Masiva Completada:\n- Clientes mapeados: ${procesados}\n- Filas ignoradas (sin coordenadas válidas): ${conError}`);
+    // Lanzar el Toast en lugar del Alert nativo bloqueante
+    setTimeout(() => {
+        let mensaje = `
+            Clientes mapeados: <strong>${procesados}</strong><br>
+            Filas ignoradas: <strong>${conError}</strong>
+        `;
+        mostrarToast("Carga Masiva Completada", mensaje);
+    }, 150);
 }
 
-// Limpiar Puntos
 document.getElementById('btnLimpiarCSV').addEventListener('click', function() {
     capaCSV.clearLayers();
     datosAuditados = []; 
@@ -373,19 +374,16 @@ document.getElementById('btnLimpiarCSV').addEventListener('click', function() {
     document.getElementById('btnDescargarCSV').style.display = 'none';
 });
 
-// ==========================================
-// 12. EXPORTACIÓN A CSV
-// ==========================================
+// =========================================================================
+// 12. EXPORTACIÓN DE RESULTADOS AUDITADOS A CSV
+// =========================================================================
 document.getElementById('btnDescargarCSV').addEventListener('click', function() {
     if (datosAuditados.length === 0) {
         alert("No hay datos para descargar. Sube un archivo CSV primero.");
         return;
     }
 
-    // Convertimos el JSON auditado de vuelta a CSV
     let csvGenerado = Papa.unparse(datosAuditados);
-    
-    // BOM para acentos y ñ
     let blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvGenerado], {type: "text/csv;charset=utf-8;"}); 
     
     let link = document.createElement("a");
@@ -397,3 +395,191 @@ document.getElementById('btnDescargarCSV').addEventListener('click', function() 
     link.click();
     document.body.removeChild(link);
 });
+
+// =========================================================================
+// 13. MOTOR DE FILTROS EN CASCADA DINÁMICOS (LECTURA EXACTA DEL GEOJSON)
+// =========================================================================
+const domDiv = document.getElementById('filtroDivision');
+const domSitio = document.getElementById('filtroSitio');
+const domGrupo = document.getElementById('filtroGrupo');
+const domPortafolio = document.getElementById('filtroPortafolio');
+const domRuta = document.getElementById('filtroRuta');
+
+// Coordenadas atadas al nombre en texto (propiedad DIVISION)
+const coordenadasDivisiones = {
+    "CHIHUAHUA": [28.6353, -106.0889],
+    "DURANGO": [24.0277, -104.6532],
+    "MONTERREY": [25.6714, -100.3095],
+    "VICTORIA": [23.7369, -99.1411]
+};
+
+// Función para poblar e inyectar el HTML de los selectores
+function poblarSelector(selectElement, setDeValores, textoDefault) {
+    selectElement.innerHTML = `<option value="TODAS">${textoDefault}</option>`;
+    let arregloOrdenado = Array.from(setDeValores).filter(v => v !== "S/D" && v !== "").sort();
+    
+    arregloOrdenado.forEach(valor => {
+        let opt = document.createElement('option');
+        opt.value = valor;
+        opt.textContent = valor;
+        selectElement.appendChild(opt);
+    });
+    
+    selectElement.disabled = (arregloOrdenado.length === 0);
+}
+
+function actualizarCascada(nivelCambiado) {
+    if (typeof poligonos === 'undefined') return;
+
+    let divSel = domDiv.value;
+    let sitSel = domSitio.value;
+    let gruSel = domGrupo.value;
+    let porSel = domPortafolio.value;
+    let rutSel = domRuta.value;
+
+    // Reseteo jerárquico estricto en cadena descendente
+    if (nivelCambiado === 'division') { sitSel = "TODAS"; gruSel = "TODAS"; porSel = "TODAS"; rutSel = "TODAS"; }
+    if (nivelCambiado === 'sitio')    { gruSel = "TODAS"; porSel = "TODAS"; rutSel = "TODAS"; }
+    if (nivelCambiado === 'grupo')    { porSel = "TODAS"; rutSel = "TODAS"; }
+    if (nivelCambiado === 'portafolio') { rutSel = "TODAS"; }
+
+    let sets = { divs: new Set(), sits: new Set(), grus: new Set(), pors: new Set(), ruts: new Set() };
+
+    // Escaneo directo a las llaves exactas que me compartiste
+    poligonos.features.forEach(f => {
+        if (!f.properties) return;
+        let p = f.properties;
+        
+        let d = p.DIVISION ? String(p.DIVISION).trim() : "S/D";
+        let s = p.SITIO ? String(p.SITIO).trim() : "S/D";
+        let g = p.GRUPO ? String(p.GRUPO).trim() : "S/D";
+        let pt = p.PORTAFOLIO ? String(p.PORTAFOLIO).trim() : "S/D";
+        let r = p.Ruta ? String(p.Ruta).trim() : "S/D";
+
+        sets.divs.add(d);
+
+        if (divSel === "TODAS" || d === divSel) {
+            sets.sits.add(s);
+            if (sitSel === "TODAS" || s === sitSel) {
+                sets.grus.add(g);
+                if (gruSel === "TODAS" || g === gruSel) {
+                    sets.pors.add(pt);
+                    if (porSel === "TODAS" || pt === porSel) {
+                        sets.ruts.add(r);
+                    }
+                }
+            }
+        }
+    });
+
+    // Inyección condicional según el nodo alterado en la interfaz
+    if (nivelCambiado === 'init') poblarSelector(domDiv, sets.divs, "Todas las Divisiones");
+    if (nivelCambiado === 'init' || nivelCambiado === 'division') poblarSelector(domSitio, sets.sits, "Todos los Sitios");
+    if (nivelCambiado === 'init' || nivelCambiado === 'division' || nivelCambiado === 'sitio') poblarSelector(domGrupo, sets.grus, "Todos los Grupos");
+    if (nivelCambiado === 'init' || nivelCambiado === 'division' || nivelCambiado === 'sitio' || nivelCambiado === 'grupo') poblarSelector(domPortafolio, sets.pors, "Todos los Portafolios");
+    if (nivelCambiado === 'init' || nivelCambiado === 'division' || nivelCambiado === 'sitio' || nivelCambiado === 'grupo' || nivelCambiado === 'portafolio') poblarSelector(domRuta, sets.ruts, "Todas las Rutas");
+
+    domDiv.value = divSel;
+    domSitio.value = sitSel;
+    domGrupo.value = gruSel;
+    domPortafolio.value = porSel;
+    domRuta.value = rutSel;
+
+    filtrarPoligonosEnMapa(divSel, sitSel, gruSel, porSel, rutSel, nivelCambiado);
+}
+
+function filtrarPoligonosEnMapa(divSel, sitSel, gruSel, porSel, rutSel, nivelCambiado) {
+    let boundsCapa = L.latLngBounds();
+    let hayPoligonosVisibles = false;
+
+    capaPoligonos.eachLayer(function(layer) {
+        if (layer.feature && layer.feature.properties) {
+            let p = layer.feature.properties;
+            
+            let d = p.DIVISION ? String(p.DIVISION).trim() : "S/D";
+            let s = p.SITIO ? String(p.SITIO).trim() : "S/D";
+            let g = p.GRUPO ? String(p.GRUPO).trim() : "S/D";
+            let pt = p.PORTAFOLIO ? String(p.PORTAFOLIO).trim() : "S/D";
+            let r = p.Ruta ? String(p.Ruta).trim() : "S/D";
+
+            let cumpleDiv = (divSel === "TODAS") || (d === divSel);
+            let cumpleSit = (sitSel === "TODAS" || s === sitSel);
+            let cumpleGru = (gruSel === "TODAS" || g === gruSel);
+            let cumplePor = (porSel === "TODAS" || pt === porSel);
+            let cumpleRut = (rutSel === "TODAS" || r === rutSel);
+
+            if (cumpleDiv && cumpleSit && cumpleGru && cumplePor && cumpleRut) {
+                layer.setStyle({ fillOpacity: 0.6, opacity: 1, weight: 1.5 });
+                boundsCapa.extend(layer.getBounds());
+                hayPoligonosVisibles = true;
+            } else {
+                layer.setStyle({ fillOpacity: 0, opacity: 0, weight: 0 });
+            }
+        }
+    });
+
+    if (nivelCambiado === 'division' && coordenadasDivisiones[divSel]) {
+        map.flyTo(coordenadasDivisiones[divSel], 8);
+    } else if (hayPoligonosVisibles && (divSel !== "TODAS" || sitSel !== "TODAS" || gruSel !== "TODAS" || porSel !== "TODAS" || rutSel !== "TODAS")) {
+        map.flyToBounds(boundsCapa, { padding: [30, 30], duration: 1.2 });
+    }
+}
+
+// Vinculación de disparadores de eventos
+domDiv.addEventListener('change', () => actualizarCascada('division'));
+domSitio.addEventListener('change', () => actualizarCascada('sitio'));
+domGrupo.addEventListener('change', () => actualizarCascada('grupo'));
+domPortafolio.addEventListener('change', () => actualizarCascada('portafolio'));
+domRuta.addEventListener('change', () => actualizarCascada('ruta'));
+
+// Ejecución inicial automática de la cascada
+actualizarCascada('init');
+// =========================================================================
+// 14. CONTROLADOR DE NOTIFICACIONES TOAST (UI MODERNA NO BLOQUEANTE)
+// =========================================================================
+let toastTimeout;
+
+function mostrarToast(titulo, mensaje) {
+    let toast = document.getElementById('toast-notificacion');
+    
+    document.getElementById('toast-titulo').innerText = titulo;
+    document.getElementById('toast-mensaje').innerHTML = mensaje; 
+    
+    toast.classList.remove('toast-oculto');
+    toast.classList.add('toast-visible');
+
+    if (toastTimeout) clearTimeout(toastTimeout);
+
+    // Ocultado automático tras 6 segundos
+    toastTimeout = setTimeout(() => {
+        cerrarToast();
+    }, 6000);
+}
+
+function cerrarToast() {
+    let toast = document.getElementById('toast-notificacion');
+    toast.classList.remove('toast-visible');
+    toast.classList.add('toast-oculto');
+}
+
+document.getElementById('toast-cerrar').addEventListener('click', cerrarToast);
+// =========================================================================
+// 15. CONTROLADOR DEL PANEL COLAPSABLE (UI MÓVIL RESPONSIVA)
+// =========================================================================
+const btnToggle = document.getElementById('btnTogglePanel');
+const btnCerrar = document.getElementById('btnCerrarPanel');
+const panelControles = document.querySelector('.controles-mapa');
+
+// Verificamos que los elementos existan en el HTML para evitar errores
+if (btnToggle && btnCerrar && panelControles) {
+    
+    // Acción para ABRIR el panel al tocar "Filtros y Herramientas"
+    btnToggle.addEventListener('click', () => {
+        panelControles.classList.add('panel-abierto');
+    });
+
+    // Acción para CERRAR el panel al tocar el botón rojo de la "X"
+    btnCerrar.addEventListener('click', () => {
+        panelControles.classList.remove('panel-abierto');
+    });
+}

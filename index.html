@@ -10,17 +10,53 @@
 </head>
 <body>
 
+    <div id="loader-overlay" class="loader-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loader-texto">Procesando datos...</p>
+    </div>
+
+    <button id="btnTogglePanel" class="btn-toggle-panel">
+        ⚙️ Filtros y Herramientas
+    </button>
+
     <div class="controles-mapa">
-        <h1>Polígonos Región Norte</h1>
         
+        <button id="btnCerrarPanel" class="btn-cerrar-panel" tittle="Cerrar Panel">
+            &times;
+        </button>
+   
         <div class="seccion-control">
             <label><strong>División:</strong></label>
-            <select name="Select Division" id="Divisiones">
-                <option value="0">Selecciona una División</option>
-                <option value="210" data-coords="28.6353, -106.0889">210 - Chihuahua</option>
-                <option value="220" data-coords="24.0277, -104.6532">220 - Durango</option>
-                <option value="230" data-coords="25.6714, -100.3095">230 - Monterrey</option>
-                <option value="240" data-coords="23.7369, -99.1411">240 - Victoria</option>
+            <select id="filtroDivision">
+                <option value="TODAS">Todas las Divisiones</option>
+            </select>
+        </div>
+
+        <div class="seccion-control">
+            <label><strong>Sitio:</strong></label>
+            <select id="filtroSitio" disabled>
+                <option value="TODAS">Todos los Sitios</option>
+            </select>
+        </div>
+
+        <div class="seccion-control">
+            <label><strong>Grupo:</strong></label>
+            <select id="filtroGrupo" disabled>
+                <option value="TODAS">Todos los Grupos</option>
+            </select>
+        </div>
+
+        <div class="seccion-control">
+            <label><strong>Portafolio:</strong></label>
+            <select id="filtroPortafolio" disabled>
+                <option value="TODAS">Todos los Portafolios</option>
+            </select>
+        </div>
+
+        <div class="seccion-control">
+            <label><strong>Ruta:</strong></label>
+            <select id="filtroRuta" disabled>
+                <option value="TODAS">Todas las Rutas</option>
             </select>
         </div>
 
@@ -29,20 +65,27 @@
             <input type="file" id="archivoCSV" accept=".csv" style="display: none;">
             <button id="btnCargarCSV" style="background-color: #388E3C;">Subir CSV</button>
             <button id="btnLimpiarCSV" class="btn-secundario" style="display: none;">Limpiar Puntos CSV</button>
-            
-            <button id="btnDescargarCSV" style="display: none; background-color: #F57C00;">📥 Descargar Resultados</button>
+            <button id="btnDescargarCSV" style="display: none; background-color: #F57C00;">Descargar Resultados</button>
         </div>
 
         <div class="seccion-control">
             <label><strong>Buscador Coordenadas:</strong></label>
             <input type="text" id="coordenadas" placeholder="Ej: 28.6353, -106.0889" style="min-width: 220px;">
-            
             <button id="btnBuscar">Ubicar Punto</button>
             <button id="btnLimpiar" class="btn-secundario">Limpiar Pin</button>
         </div>
     </div>
 
     <div id="map"></div>
+
+    <div id="toast-notificacion" class="toast-oculto">
+        <div class="toast-icono">✅</div>
+        <div class="toast-contenido">
+            <strong id="toast-titulo">Éxito</strong>
+            <p id="toast-mensaje">Mensaje aquí</p>
+        </div>
+        <button id="toast-cerrar">&times;</button>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>

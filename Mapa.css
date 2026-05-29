@@ -9,7 +9,7 @@
 }
 
 /* =========================================
-   2. RESET Y CONFIGURACIÓN GENERAL
+   2. RESET Y CONFIGURACIÓN GENERAL (MODO OSCURO BASE)
    ========================================= */
 * {
     box-sizing: border-box;
@@ -19,38 +19,36 @@
 
 body, html {
     height: 100%;
-    overflow: hidden; /* Elimina el scroll de la página */
-    /* Fuentes del sistema nativas para máxima legibilidad en los datos y controles */
+    overflow: hidden; 
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f4f6f9; 
-    color: #333;
-    
-    /* Convierte la página en una columna flexible para el diseño responsivo */
+    /* Fondo oscuro general */
+    background-color: #1a202c; 
+    color: #e2e8f0;
     display: flex;
     flex-direction: column;
 }
 
 /* =========================================
-   3. PANEL DE CONTROLES (HEADER)
+   3. PANEL DE CONTROLES (HEADER OSCURO)
    ========================================= */
 .controles-mapa {
-    background: #ffffff;
+    background: #2d3748; /* Color oscuro restaurado */
     padding: 15px 25px; 
     display: flex;
-    flex-wrap: wrap; /* Permite que los elementos bajen de renglón si no hay espacio */
+    flex-wrap: wrap; 
     align-items: center;
     gap: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Sombra más pronunciada */
     position: relative;
     z-index: 1000;
 }
 
 .controles-mapa h1 {
-    font-family: 'FuenteCorporativa', sans-serif; /* APLICADO SOLO AL TÍTULO */
+    font-family: 'FuenteCorporativa', sans-serif;
     font-size: 22px; 
     font-weight: 600;
-    color: #1a202c;
-    border-right: 2px solid #e2e8f0;
+    color: #f7fafc;
+    border-right: 2px solid #4a5568;
     padding-right: 15px;
     letter-spacing: 0.5px;
 }
@@ -67,27 +65,36 @@ body, html {
 .seccion-control label {
     font-size: 14px;
     font-weight: 600;
-    color: #4a5568;
+    color: #a0aec0; /* Texto de etiquetas en modo oscuro */
 }
 
 /* =========================================
-   5. INPUTS Y SELECTORES
+   5. INPUTS Y SELECTORES (TEMA OSCURO)
    ========================================= */
 input, select {
     padding: 9px 14px;
-    border: 1px solid #cbd5e0;
+    border: 1px solid #718096;
     border-radius: 6px;
     font-size: 14px;
     outline: none;
-    background-color: #f8fafc;
+    background-color: #4a5568; /* Fondo oscuro para inputs */
+    color: #f7fafc;
     transition: all 0.2s ease;
-    font-family: inherit; /* Hereda la fuente limpia del body */
+    font-family: inherit;
 }
 
 input:focus, select:focus {
-    border-color: #3182ce;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+    background-color: #2d3748;
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.2);
+}
+
+/* Estado deshabilitado en modo oscuro */
+input:disabled, select:disabled {
+    background-color: #3f4d63;
+    color: #879ab3;
+    border-color: #4a5568;
+    cursor: not-allowed;
 }
 
 /* =========================================
@@ -103,7 +110,7 @@ button {
     font-weight: 600;
     font-size: 14px;
     transition: background-color 0.2s, transform 0.1s;
-    font-family: inherit; /* Hereda la fuente limpia del body */
+    font-family: inherit;
 }
 
 button:hover {
@@ -126,19 +133,19 @@ button:active {
    7. CONTENEDOR DEL MAPA
    ========================================= */
 #map {
-    flex: 1; /* Toma todo el espacio vertical que sobra */
+    flex: 1; 
     width: 100%;
     z-index: 1;
 }
 
 /* =========================================
-   8. LEYENDA (DENTRO DEL MAPA)
+   8. LEYENDA (DENTRO DEL MAPA - OSCURA)
    ========================================= */
 .info.legend {
-    background-color: rgba(255, 255, 255, 0.95) !important;
+    background-color: rgba(45, 55, 72, 0.95) !important;
     padding: 15px !important;
     border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
     border: none !important;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -150,9 +157,9 @@ button:active {
     grid-column: 1 / -1;
     margin: 0 0 8px 0 !important;
     font-size: 15px;
-    color: #2d3748;
+    color: #f7fafc;
     font-weight: 600;
-    border-bottom: 1px solid #edf2f7;
+    border-bottom: 1px solid #4a5568;
     padding-bottom: 8px;
     text-align: center;
 }
@@ -161,99 +168,223 @@ button:active {
     display: flex;
     align-items: center;
     font-size: 13px;
-    color: #4a5568;
+    color: #e2e8f0;
     font-weight: 500;
 }
 
 .info.legend i {
     border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.1) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
     margin-right: 10px !important;
 }
 
 /* =========================================
-   9. RESPONSIVIDAD (PANTALLAS DIVIDIDAS Y MÓVILES)
+   9. FEEDBACK VISUAL (SPINNER DE CARGA)
    ========================================= */
-@media (max-width: 900px) {
-    .controles-mapa {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 15px;
-    }
-    
-    .controles-mapa h1 {
-        border-right: none;
-        border-bottom: 2px solid #e2e8f0;
-        padding-right: 0;
-        padding-bottom: 10px;
-        margin-bottom: 5px;
-        text-align: center;
-    }
-    
-    .seccion-control {
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-bottom: 5px;
-    }
-    
-    .seccion-control input, 
-    .seccion-control select {
-        flex: 1;
-        min-width: 140px;
-    }
+.loader-overlay {
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(26, 32, 44, 0.85); /* Fondo oscuro semitransparente */
+    z-index: 9999; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    border: 6px solid #4a5568;
+    border-top: 6px solid #63b3ed;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loader-texto {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f7fafc;
+    font-family: system-ui, sans-serif;
 }
 
 /* =========================================
-   10. MODO OSCURO (PRUEBA VISUAL)
+   10. NOTIFICACIONES FLOTANTES (TOAST)
    ========================================= */
-body {
-    background-color: #1a202c; 
-    color: #e2e8f0;
+#toast-notificacion {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: #2d3748; /* Toast oscuro */
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    z-index: 10000;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+    max-width: 350px;
+    border-left: 5px solid #48bb78; /* Verde brillante */
 }
 
-.controles-mapa {
-    background: #2d3748;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+.toast-oculto {
+    transform: translateX(120%); 
+    opacity: 0;
 }
 
-.controles-mapa h1 {
+.toast-visible {
+    transform: translateX(0); 
+    opacity: 1;
+}
+
+.toast-icono {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.toast-contenido {
+    flex: 1;
+}
+
+.toast-contenido strong {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 4px;
     color: #f7fafc;
-    border-right-color: #4a5568;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; 
+    font-weight: 600; 
+    letter-spacing: 0.3px;
 }
 
-.seccion-control label {
+#toast-mensaje strong {
+    display: inline;
+    font-size: 16px;
+    color: #63b3ed; 
+}
+
+.toast-contenido p {
+    margin: 0;
+    font-size: 14px;
+    color: #e2e8f0;
+    line-height: 1.5;
+}
+
+#toast-cerrar {
+    background: none;
+    border: none;
     color: #a0aec0;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
 }
 
-input, select {
-    background-color: #4a5568;
-    border-color: #718096;
-    color: #f7fafc;
-}
-
-input:focus, select:focus {
-    background-color: #2d3748;
-    border-color: #63b3ed;
-}
-
-/* Leyenda oscura */
-.info.legend {
-    background-color: rgba(45, 55, 72, 0.95) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-}
-
-.info.legend h4 {
-    color: #f7fafc;
-    border-bottom-color: #4a5568;
-}
-
-.info.legend div {
+#toast-cerrar:hover {
     color: #e2e8f0;
 }
 
-/* Bordes en móviles */
+/* =========================================
+   11. PANEL COLAPSABLE (UI MÓVIL Y RESPONSIVA)
+   ========================================= */
+.btn-toggle-panel {
+    display: none; 
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 900; 
+    background-color: #2d3748; 
+    color: white;
+    border: 1px solid #4a5568;
+    padding: 10px 24px;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* LA NUEVA "X" ELEGANTE Y DISCRETA */
+.btn-cerrar-panel {
+    display: none;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: transparent;
+    color: #a0aec0;
+    font-size: 32px; /* Tamaño grande solo para la X para facilitar el tap con el dedo */
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    box-shadow: none;
+    z-index: 2001; /* Asegura que esté por encima de los filtros */
+    transition: color 0.2s;
+}
+
+.btn-cerrar-panel:hover {
+    background: transparent;
+    color: #f7fafc; /* Se ilumina un poco al pasar el dedo/mouse */
+}
+
 @media (max-width: 900px) {
-    .controles-mapa h1 {
-        border-bottom-color: #4a5568;
+    .btn-toggle-panel {
+        display: block;
+    }
+
+    .btn-cerrar-panel {
+        display: block;
+    }
+
+    .controles-mapa {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh; 
+        overflow-y: auto; /* Permite scroll vertical normal */
+        overflow-x: hidden; /* MATA EL SCROLL HORIZONTAL */
+        z-index: 2000; 
+        flex-direction: column;
+        flex-wrap: nowrap; /* OBLIGA A QUE TODO QUEDE EN UNA SOLA COLUMNA */
+        justify-content: flex-start; /* Alinea todo desde arriba */
+        align-items: stretch;
+        padding: 60px 20px 20px 20px; /* El 60px arriba deja un espacio para que la X no estorbe con el primer filtro */
+        background-color: #1a202c; 
+        
+        transform: translateY(-120%); 
+        transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .controles-mapa.panel-abierto {
+        transform: translateY(0);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+    }
+    
+    .seccion-control {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 15px;
+        gap: 5px;
+    }
+    
+    /* Para asegurar que los botones e inputs no se salgan de la pantalla */
+    .seccion-control input, 
+    .seccion-control select,
+    .seccion-control button {
+        width: 100%; 
+        max-width: 100%;
     }
 }
