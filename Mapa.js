@@ -37,12 +37,12 @@ L.control.layers(mapasBase, null, {position: 'topright'}).addTo(map);
 // =========================================================================
 function getColor(dia) {
     switch (dia) {
-        case 'Lun': return '#4F2170'; 
-        case 'Mar': return '#287819'; 
-        case 'Mie': return '#2D6EAA'; 
-        case 'Jue': return '#E6AF23'; 
-        case 'Vie': return '#A52323'; 
-        case 'Sab': return '#623E23'; 
+        case 'LUN': return '#4F2170'; 
+        case 'MAR': return '#287819'; 
+        case 'MIE': return '#2D6EAA'; 
+        case 'JUE': return '#E6AF23'; 
+        case 'VIE': return '#A52323'; 
+        case 'SAB': return '#623E23'; 
         default:    return '#757575';
     }
 }
@@ -64,9 +64,9 @@ function popup(feature, layer) {
             "<strong>Ruta Espejo: </strong>" + rutaEspejo +
             "<br/><strong>Día Espejo: </strong>" + diaEspejo + 
             "<hr style='margin: 5px 0; border: 0; border-top: 1px solid #ccc;'>" +
-            "<strong>Sitio: </strong>" + (feature.properties.SITIO || "N/A") +
-            "<br/><strong>Grupo: </strong>" + (feature.properties.GRUPO || "N/A") +
-            "<br/><strong>Portafolio: </strong>" + (feature.properties.PORTAFOLIO || "N/A") +
+            "<strong>Sitio: </strong>" + (feature.properties.Sitio || "N/A") +
+            "<br/><strong>Grupo: </strong>" + (feature.properties.Grupo || "N/A") +
+            "<br/><strong>Portafolio: </strong>" + (feature.properties.Portafolio || "N/A") +
             "</div>"
         );
     }
@@ -200,7 +200,7 @@ var legend = L.control({position: 'bottomright'});
 
 legend.onAdd = function (map) {
     var div = L.DomUtil.create('div', 'info legend');
-    var dias = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
+    var dias = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'];
     
     div.style.backgroundColor = 'white';
     div.style.padding = '10px';
@@ -407,10 +407,18 @@ const domRuta = document.getElementById('filtroRuta');
 
 // Coordenadas atadas al nombre en texto (propiedad DIVISION)
 const coordenadasDivisiones = {
-    "CHIHUAHUA": [28.6353, -106.0889],
-    "DURANGO": [24.0277, -104.6532],
-    "MONTERREY": [25.6714, -100.3095],
-    "VICTORIA": [23.7369, -99.1411]
+    "210 - CHIHUAHUA": [28.6353, -106.0889],
+    "220 - DURANGO": [24.0277, -104.6532],
+    "230 Y 231 - MONTERREY": [25.6714, -100.3095], 
+    "240 - VICTORIA": [23.7369, -99.1411]
+};
+
+const mapeoDivisiones = {
+    "210": "210 - CHIHUAHUA", "CHIHUAHUA": "210 - CHIHUAHUA",
+    "220": "220 - DURANGO", "DURANGO": "220 - DURANGO",
+    "230": "230 - MONTERREY", "MONTERREY": "230 - MONTERREY", 
+    "231": "230 - MONTERREY", "MONTERREY": "230 - MONTERREY", 
+    "240": "240 - VICTORIA", "VICTORIA": "240 - VICTORIA"
 };
 
 // Función para poblar e inyectar el HTML de los selectores
@@ -450,10 +458,12 @@ function actualizarCascada(nivelCambiado) {
         if (!f.properties) return;
         let p = f.properties;
         
-        let d = p.DIVISION ? String(p.DIVISION).trim() : "S/D";
-        let s = p.SITIO ? String(p.SITIO).trim() : "S/D";
-        let g = p.GRUPO ? String(p.GRUPO).trim() : "S/D";
-        let pt = p.PORTAFOLIO ? String(p.PORTAFOLIO).trim() : "S/D";
+        let divOriginal = p.Division ? String(p.Division).trim().toUpperCase() : "S/D";
+        let d = mapeoDivisiones[divOriginal] || divOriginal;
+        
+        let s = p.Sitio ? String(p.Sitio).trim() : "S/D";
+        let g = p.Grupo ? String(p.Grupo).trim() : "S/D";
+        let pt = p.Portafolio ? String(p.Portafolio).trim() : "S/D";
         let r = p.Ruta ? String(p.Ruta).trim() : "S/D";
 
         sets.divs.add(d);
@@ -496,10 +506,12 @@ function filtrarPoligonosEnMapa(divSel, sitSel, gruSel, porSel, rutSel, nivelCam
         if (layer.feature && layer.feature.properties) {
             let p = layer.feature.properties;
             
-            let d = p.DIVISION ? String(p.DIVISION).trim() : "S/D";
-            let s = p.SITIO ? String(p.SITIO).trim() : "S/D";
-            let g = p.GRUPO ? String(p.GRUPO).trim() : "S/D";
-            let pt = p.PORTAFOLIO ? String(p.PORTAFOLIO).trim() : "S/D";
+            let divOriginal = p.Division ? String(p.Division).trim().toUpperCase() : "S/D";
+            let d = mapeoDivisiones[divOriginal] || divOriginal;
+            
+            let s = p.Sitio ? String(p.Sitio).trim() : "S/D";
+            let g = p.Grupo ? String(p.Grupo).trim() : "S/D";
+            let pt = p.Portafolio ? String(p.Portafolio).trim() : "S/D";
             let r = p.Ruta ? String(p.Ruta).trim() : "S/D";
 
             let cumpleDiv = (divSel === "TODAS") || (d === divSel);
